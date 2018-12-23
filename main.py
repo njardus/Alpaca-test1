@@ -3,7 +3,10 @@ from loguru import logger
 import algo
 # import alpaca_trade_api as tradeapi
 
-logger.info("Project name: Alpaca-test1")
+# Todo: Implement backtesting
+# Todo: Implement paper trading
+
+logger.info("Project name: Alpha-Vantage-test1")
 logger.info("--------------------------")
 logger.info("Program started")
 

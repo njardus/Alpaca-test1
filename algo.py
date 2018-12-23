@@ -1,39 +1,39 @@
 from loguru import logger
 import os
 import time
-import alpaca_trade_api as tradeapi
+from alpha_vantage.timeseries import TimeSeries
+
 from universe import Universe
+from universe import UniverseHoldings
+import settings
 
 logger.info("Start algo script")
 
 hardlimit = 10000
 
-api = tradeapi.REST(
-    key_id=os.environ['alpacakeyid'],
-    secret_key=os.environ['alpacasecretkey'],
-    base_url='https://paper-api.alpaca.markets'
-)
+ts = TimeSeries(key=os.environ['ALPHAVANTAGE_API_KEY'])
 
 def main():
     done = None
     logger.info("Start function")
 
-    while True: #This runs indefinitely
+    while not done: #This runs indefinitely
         logger.debug("Start of the infinite while loop")
+        data = None
+        meta_data = None
 
-        # Get the server time, and see if the market is open
-        clock = api.get_clock()
-        now = clock.timestamp
-
-        if clock.is_open and done != now.strftime('%Y-%m-%d'):
-            logger.success("We're in the doing stuff place")
-            done = now.strftime('%Y-%m-%d')
-            logger.success(f'Done for {done}')
-        else:
-            logger.debug(f"clock.is_open = {clock.is_open}")
-            logger.debug(f"now.strftime = {now.strftime('%Y-%m-%d')}")
-
-        logger.debug('Iterate!')
-        time.sleep(1)
+        for index in UniverseHoldings:
+            data, meta_data = ts.get_intraday(index)
+            if (data != None) & (meta_data != None):
+                logger.debug("data and meta_data are not empty anymore, so dump the data in a db")
+                #TODO: Update dashboard using a new thread, and then turn into an indefinite loop again.
+                # print(meta_data)
+                # print(data)
+                if index == UniverseHoldings[-1]:
+                    time.sleep(settings.updatetime)
+                    done = True
+            else:
+                logger.debug('Iterate!')
+                time.sleep(1)
 
     logger.info("Complete function")
