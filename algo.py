@@ -5,6 +5,7 @@ from alpha_vantage.timeseries import TimeSeries
 
 from universe import Universe
 from universe import UniverseHoldings
+import dbhandling as db
 import settings
 
 logger.info("Start algo script")
@@ -25,7 +26,8 @@ def main():
         for index in UniverseHoldings:
             data, meta_data = ts.get_intraday(index)
             if (data != None) & (meta_data != None):
-                logger.debug("data and meta_data are not empty anymore, so dump the data in a db")
+                logger.debug(f"data and meta_data for {index} populated, so dump the data in a db")
+                db.putdataintodb(data,meta_data)
                 #TODO: Update dashboard using a new thread, and then turn into an indefinite loop again.
                 # print(meta_data)
                 # print(data)
